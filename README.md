@@ -36,7 +36,6 @@ Client -> POST /api/auth/register -> AuthController -> UserService -> UserReposi
 - Password validated with configurable regex.
 - JWT token generated and persisted.
 
-Client -> POST /api/auth/register -> AuthController -> UserService -> UserRepository -> H2 DB
 ```bash 
 curl --location 'localhost:8080/api/auth/register' \
 --header 'Content-Type: application/json' \
@@ -110,6 +109,37 @@ Response:
   "lastLogin": "2025-09-04T22:08:02.912028",
   "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImlhdCI6MTc1NzA0MTY4MywiZXhwIjoxNzU3MTI4MDgzfQ.IwqQp1QFJXa_YyjIA42Jdgldcsd_1A3NVUyNkhYYiGI",
   "active": true
+}
+```
+
+Client -> PUT /api/users/{id} -> UserCommandController -> UserService -> UserRepository -> H2 DB
+```bash
+curl --location --request PUT 'localhost:8080/api/users/bfd5a89c-925f-42da-a1eb-f2408c0cc0e9' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImlhdCI6MTc1NzA0NzUzNCwiZXhwIjoxNzU3MTMzOTM0fQ.nXF1ALrTllNYjiNvrjIpOMaHbWQbL5Z8MpQ7opwbp-E' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=DA6A8BB7DDBA5F96C480BFF734D409B7' \
+--data-raw '
+{
+    "name": "asd-updated",
+    "email": "asd@asd.com",
+    "password": "12345",
+    "phones": [],
+    "active": false
+}'
+```
+Response:
+```json
+{
+  "id": "bfd5a89c-925f-42da-a1eb-f2408c0cc0e9",
+  "name": "asd-updated",
+  "email": "asd@asd.com",
+  "password": "$2a$10$xTLKjFRUo8OuQnJGE5UtU.C/6MzrZhShwz0pzJkhZB7FCa4KoxGF6",
+  "phones": [],
+  "created": "2025-09-04T23:45:24.870618",
+  "modified": "2025-09-04T23:46:21.062146",
+  "lastLogin": "2025-09-04T23:46:20.954804",
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImlhdCI6MTc1NzA0NzUzNCwiZXhwIjoxNzU3MTMzOTM0fQ.nXF1ALrTllNYjiNvrjIpOMaHbWQbL5Z8MpQ7opwbp-E",
+  "active": false
 }
 ```
 
