@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: demo
+    security:
+      jwt:
+        secret: KsdLbzbJCtR3e9Dc5ocJVcIuNl6neKcvCzXuF6bzHeg=
+        expiration: 86400000 # 1 day in milliseconds
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: admin
+    password: "password"
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
