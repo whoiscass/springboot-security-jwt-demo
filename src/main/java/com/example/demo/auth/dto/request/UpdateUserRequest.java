@@ -1,6 +1,5 @@
 package com.example.demo.auth.dto.request;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,6 +20,5 @@ public record UpdateUserRequest(
         String email,
         String password,
         List<PhoneDto> phones,
-        LocalDateTime modified,
         boolean isActive
 ) {}

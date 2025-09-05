@@ -52,6 +52,6 @@ public class UserCommandController {
     public ResponseEntity<User> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.update(request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(request, id));
     }
 }

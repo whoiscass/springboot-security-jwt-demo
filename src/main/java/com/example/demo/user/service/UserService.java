@@ -95,25 +95,33 @@ public class UserService {
      * Throws:
      * - ResponseStatusException with status 404 if no user with the given email is found
      */
+    public User update(UpdateUserRequest request, UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-    public User update(UpdateUserRequest request) {
-        Optional<User> userOpt = userRepository.findByEmail(request.email());
-        if (userOpt.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        user.setLastLogin(LocalDateTime.now());
 
-        LocalDateTime now = LocalDateTime.now();
+        Optional.ofNullable(request.name())
+                .filter(name -> !name.isBlank())
+                .ifPresent(user::setName);
 
-        User user = User.builder()
-                .name(request.name())
-                .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
-                .phones(getPhonesFromRequest(request.phones()))
-                .modified(now)
-                .build();
+        Optional.ofNullable(request.email())
+                .filter(email -> !email.isBlank())
+                .ifPresent(user::setEmail);
+
+        Optional.ofNullable(request.password())
+                .filter(password -> !password.isBlank())
+                .ifPresent(password -> user.setPassword(passwordEncoder.encode(password)));
+
+        Optional.ofNullable(request.phones())
+                .filter(phones -> !phones.isEmpty())
+                .ifPresent(phones -> user.setPhones(getPhonesFromRequest(phones)));
+
+        user.setActive(request.isActive());
 
         return userRepository.save(user);
     }
+
 
     /**
      * Authenticates a user using the provided login credentials.

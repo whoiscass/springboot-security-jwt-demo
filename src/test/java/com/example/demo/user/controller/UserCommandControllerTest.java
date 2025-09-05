@@ -6,7 +6,6 @@ import com.example.demo.user.service.UserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +31,12 @@ public class UserCommandControllerTest {
 
     @Test
     public void testUpdateUser_Success() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         UpdateUserRequest request = new UpdateUserRequest(
                 "John Doe",
                 "john.doe@example.com",
                 "newSecurePassword123",
                 Collections.emptyList(),
-                LocalDateTime.now(),
                 false
         );
 
@@ -53,14 +50,12 @@ public class UserCommandControllerTest {
         updatedUser.setLastLogin(LocalDateTime.now().minusHours(1));
         updatedUser.setActive(true);
 
-        when(userService.update(request)).thenReturn(updatedUser);
+        when(userService.update(request, userId)).thenReturn(updatedUser);
 
-        // Act
         ResponseEntity<User> response = userCommandController.update(userId, request);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertThat(response.getBody()).isNotNull();
-        verify(userService, times(1)).update(request);
+        verify(userService, times(1)).update(any(), any());
     }
 }
