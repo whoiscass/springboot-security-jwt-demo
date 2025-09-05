@@ -5,7 +5,6 @@ import com.example.demo.auth.dto.request.LoginRequest;
 import com.example.demo.auth.dto.request.PhoneDto;
 import com.example.demo.auth.dto.response.RegisterUserResponse;
 import com.example.demo.config.security.JwtService;
-import com.example.demo.user.entity.Phone;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,7 @@ class UserServiceTest {
     }
 
     @Test
-    void createUser_success() {
+    void create_success() {
         PhoneDto phoneDto = new PhoneDto("123456789", "01", "57");
         CreateUserRequest request = new CreateUserRequest(
                 "John Doe",
@@ -62,7 +61,7 @@ class UserServiceTest {
         });
 
 
-        RegisterUserResponse response = userService.createUser(request);
+        RegisterUserResponse response = userService.create(request);
 
 
         assertThat(response).isNotNull();
@@ -83,7 +82,7 @@ class UserServiceTest {
     }
 
     @Test
-    void createUser_emailAlreadyRegistered_throwsException() {
+    void create_emailAlreadyRegistered_throwsException() {
 
         CreateUserRequest request = new CreateUserRequest(
                 "John Doe",
@@ -95,7 +94,7 @@ class UserServiceTest {
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(new User()));
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.createUser(request))
+        assertThatThrownBy(() -> userService.create(request))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Email already registered");
 

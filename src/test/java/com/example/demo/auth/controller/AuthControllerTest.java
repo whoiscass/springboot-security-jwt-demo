@@ -8,8 +8,6 @@ import com.example.demo.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.mockito.Mockito;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -51,7 +49,7 @@ class AuthControllerTest {
                 true
         );
 
-        when(userService.createUser(request)).thenReturn(response);
+        when(userService.create(request)).thenReturn(response);
 
         // Act
         ResponseEntity<RegisterUserResponse> result = authController.create(request);
@@ -61,7 +59,7 @@ class AuthControllerTest {
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(result.getBody()).isEqualTo(response);
 
-        verify(userService).createUser(request);
+        verify(userService).create(request);
     }
 
     @Test

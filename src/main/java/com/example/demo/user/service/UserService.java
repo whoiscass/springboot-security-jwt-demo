@@ -6,9 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.example.demo.auth.dto.request.LoginRequest;
-import com.example.demo.config.security.JwtService;
-import com.example.demo.auth.dto.response.RegisterUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +17,11 @@ import com.example.demo.auth.dto.request.CreateUserRequest;
 import com.example.demo.user.entity.Phone;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.auth.dto.request.LoginRequest;
+import com.example.demo.auth.dto.request.PhoneDto;
+import com.example.demo.auth.dto.request.UpdateUserRequest;
+import com.example.demo.config.security.JwtService;
+import com.example.demo.auth.dto.response.RegisterUserResponse;
 
 /**
  * UserService handles business logic related to user management.
@@ -45,7 +47,7 @@ public class UserService {
      * @return a RegisterUserResponse representing the created user
      * @throws ResponseStatusException if the email is already registered
      */
-    public RegisterUserResponse createUser(CreateUserRequest request) {
+    public RegisterUserResponse create(CreateUserRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
         }
@@ -56,7 +58,7 @@ public class UserService {
                 .name(request.name())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .phones(getPhonesFromRequest(request))
+                .phones(getPhonesFromRequest(request.phones()))
                 .created(now)
                 .modified(now)
                 .lastLogin(now)
@@ -77,6 +79,57 @@ public class UserService {
                 user.isActive()
         );
     }
+
+    /**
+     * Updates an existing user based on the provided UpdateUserRequest.
+     *
+     * Looks up the user by email. If found, updates the user's name, email, password, phone list,
+     * and modification timestamp, then persists the updated user entity to the database.
+     *
+     * Parameters:
+     * - request: the UpdateUserRequest object containing the new user details
+     *
+     * Returns:
+     * The updated User entity
+     *
+     * Throws:
+     * - ResponseStatusException with status 404 if no user with the given email is found
+     */
+
+    public User update(UpdateUserRequest request) {
+        Optional<User> userOpt = userRepository.findByEmail(request.email());
+        if (userOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        User user = User.builder()
+                .name(request.name())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .phones(getPhonesFromRequest(request.phones()))
+                .modified(now)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Authenticates a user using the provided login credentials.
+     *
+     * Verifies that the user exists by email, updates the last login timestamp,
+     * generates a new authentication token, and saves the updated user entity.
+     *
+     * Parameters:
+     * - request: the LoginRequest object containing the user's login credentials
+     *
+     * Returns:
+     * A RegisterUserResponse containing user information and a new authentication token
+     *
+     * Throws:
+     * - ResponseStatusException with status 404 if the user is not found
+     */
 
     public RegisterUserResponse login(LoginRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.email());
@@ -121,11 +174,11 @@ public class UserService {
      * Converts the list of Phone DTOs from the CreateUserRequest
      * into a list of Phone entity objects.
      *
-     * @param request the user creation request containing phone data
+     * @param list of PhoneDto  the user creation request containing phone data
      * @return a list of Phone entities
      */
-    private List<Phone> getPhonesFromRequest(CreateUserRequest request) {
-        return request.phones().stream()
+    private List<Phone> getPhonesFromRequest(List<PhoneDto> phones) {
+        return phones.stream()
                 .map(phoneRequest -> {
                     Phone phone = new Phone();
                     phone.setNumber(phoneRequest.number());

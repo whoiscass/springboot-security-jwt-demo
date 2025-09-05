@@ -6,8 +6,11 @@ A Spring Boot application with a RESTful API for user registration, built with J
 1. Clone the repository.
 2. Ensure Java 17 and Gradle are installed.
 3. Run the application:
+```bash
+   ./gradlew clean build
+   ```
    ```bash
-   clean bootRun --args='--spring.profiles.active=dev'
+   ./gradlew clean bootRun --args='--spring.profiles.active=dev'
    ```
 4. Access the H2 console at http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:testdb`, username: `sa`, password: empty).
 5. Access Swagger UI at http://localhost:8080/swagger-ui.html.
