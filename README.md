@@ -13,7 +13,7 @@ A Spring Boot application with a RESTful API for user registration, built with J
    ./gradlew clean bootRun --args='--spring.profiles.active=dev'
    ```
 
-4. Use Postman or curl to test the API endpoints. You can also Access the H2 console at http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:testdb`, username: `sa`, password: empty).
+4. Use Postman or curl to test the API endpoints. You can also Access the H2 console at http://localhost:8080/h2-console (credentials -> application-dev.yml).
    You can Access Swagger UI at http://localhost:8080/swagger-ui/index.html to explore the API documentation and test endpoints interactively.
 
 ## Testing the API and solution diagram
