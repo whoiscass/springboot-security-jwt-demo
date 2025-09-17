@@ -16,6 +16,8 @@ import com.example.demo.auth.dto.request.CreateUserRequest;
 import com.example.demo.auth.dto.response.RegisterUserResponse;
 import com.example.demo.user.service.UserService;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Controller for handling authentication-related requests.
  * Provides endpoints for user registration.
@@ -34,8 +36,9 @@ public class AuthController {
      * @return A ResponseEntity containing the created user's details and HTTP status 201 (Created).
      */
     @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<RegisterUserResponse> create(@Valid @RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
+    public CompletableFuture<ResponseEntity<RegisterUserResponse>> create(@Valid @RequestBody CreateUserRequest request) {
+        return userService.create(request)
+                .thenApply(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
     /**

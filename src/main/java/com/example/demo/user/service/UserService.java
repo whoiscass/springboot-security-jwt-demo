@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,9 +33,12 @@ import com.example.demo.auth.dto.response.RegisterUserResponse;
  * It provides functionalities for creating users, retrieving user information,
  * and converting request data into entity models.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+    private final Executor userExecutor;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -47,37 +54,42 @@ public class UserService {
      * @return a RegisterUserResponse representing the created user
      * @throws ResponseStatusException if the email is already registered
      */
-    public RegisterUserResponse create(CreateUserRequest request) {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
-        }
+    @Async("userExecutor")
+    public CompletableFuture<RegisterUserResponse> create(CreateUserRequest request) {
+        log.info("current thread: {}", Thread.currentThread().getName());
 
-        LocalDateTime now = LocalDateTime.now();
+        return CompletableFuture.supplyAsync(() -> {
+            if (userRepository.findByEmail(request.email()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
+            }
 
-        User user = User.builder()
-                .name(request.name())
-                .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
-                .phones(getPhonesFromRequest(request.phones()))
-                .created(now)
-                .modified(now)
-                .lastLogin(now)
-                .build();
+            LocalDateTime now = LocalDateTime.now();
 
-        user.setToken(jwtService.generateToken(user));
+            User user = User.builder()
+                    .name(request.name())
+                    .email(request.email())
+                    .password(passwordEncoder.encode(request.password()))
+                    .phones(getPhonesFromRequest(request.phones()))
+                    .created(now)
+                    .modified(now)
+                    .lastLogin(now)
+                    .build();
 
-        user = userRepository.save(user);
+            user.setToken(jwtService.generateToken(user));
 
-        return new RegisterUserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getToken(),
-                user.getCreated(),
-                user.getModified(),
-                user.getLastLogin(),
-                user.isActive()
-        );
+            user = userRepository.save(user);
+
+            return new RegisterUserResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getToken(),
+                    user.getCreated(),
+                    user.getModified(),
+                    user.getLastLogin(),
+                    user.isActive()
+            );
+        }, userExecutor);
     }
 
     /**
